@@ -1,11 +1,15 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require("socket.io");
+const path = require('path');
 const photoRoutes = require('./routes/photo.routes');
 const roomManager = require('./utils/roomManager');
 
 const app = express();
 const server = http.createServer(app);
+
+// Set Up Frontend
+app.use(express.static(path.join(__dirname, '../../photobooth-frontend')));
 
 // Set up Socket.IO with CORS
 const io = new Server(server, {

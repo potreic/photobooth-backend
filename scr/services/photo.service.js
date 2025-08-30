@@ -5,15 +5,21 @@ const { v4: uuidv4 } = require('uuid');
 const uploadDir = path.join(__dirname, '../uploads');
 
 exports.combinePhotos = async (photos) => {
-    const finalStrip = await Jimp.read(500, 1500, 0xFFFFFFFF); // 500x1500 white background
+    // A photo strip will be 500px wide and 1500px tall (3 photos at 500x500 each)
+    const finalStrip = new Jimp(500, 1500, 0xFFFFFFFF); 
+    
+    // An array to store all loaded Jimp images
+    const loadedImages = await Promise.all(photos.map(photo => Jimp.read(photo.path)));
 
-    for (let i = 0; i < photos.length; i++) {
-        const photo = photos[i];
-        const image = await Jimp.read(photo.path);
-
-        // Resize and composite the photo
-        image.resize(500, Jimp.AUTO); 
-        finalStrip.composite(image, 0, i * 250); 
+    // Composite each image onto the final strip
+    for (let i = 0; i < loadedImages.length; i++) {
+        const image = loadedImages[i];
+        
+        // Resize the image to fit the strip
+        image.resize(500, 500); 
+        
+        // Composite the image onto the final strip at the correct position
+        finalStrip.composite(image, 0, i * 500); 
     }
 
     const finalFilename = `${uuidv4()}.jpeg`;
